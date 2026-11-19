@@ -15,7 +15,11 @@ Plataforma de monitoramento e priorização de riscos urbanos (alagamentos, ilha
 ## Pré-requisitos
 
 - Java 21, Node 20+, Docker (testes de integração e E2E)
-- Copiar `.env.example` para `.env` na raiz e preencher `DB_*` (Supabase pooler), `INGEST_API_KEY` e `REPORTER_HASH_PEPPER`. Sem esses dois últimos o backend recusa ingestão / não sobe.
+- Copiar `.env.example` para `.env` na raiz e preencher:
+  - `SUPABASE_DB_HOST`, `SUPABASE_DB_PORT`, `SUPABASE_DB_DATABASE`, `SUPABASE_DB_USER`, `SUPABASE_DB_PASSWORD` (painel do Supabase › Connect). Alternativa: `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, que têm prioridade.
+  - `INGEST_API_KEY` e `REPORTER_HASH_PEPPER` (ex.: `openssl rand -hex 32`). Sem eles o backend recusa ingestão / não sobe.
+- O host direto `db.<ref>.supabase.co` só tem IPv6; em rede sem IPv6 use os dados do **Session pooler**.
+- No primeiro boot o Flyway cria as tabelas no Supabase (RLS ligado, sem acesso para `anon`/`authenticated`).
 
 ## Backend
 
@@ -46,6 +50,20 @@ docker run --rm -d --name urip-qa-db -e POSTGRES_PASSWORD=qa -p 55433:5432 postg
 cd mobile && npm run test:e2e:fullstack
 docker stop urip-qa-db
 ```
+
+## Vídeo de demonstração
+
+Roteiro Playwright gravado em vídeo (tela de celular, legendas em português) cobrindo todas as telas: painel, filtros, tempo real, alertas, evento resolvido, queda e volta do backend.
+
+```sh
+cd mobile
+npm run demo:video:supabase   # usa o banco do .env (não apaga dados)
+# ou, com Postgres local descartável:
+docker run --rm -d --name urip-qa-db -e POSTGRES_PASSWORD=qa -p 55433:5432 postgres:16
+npm run demo:video
+```
+
+O vídeo sai em `mobile/demo-video/**/video.webm`.
 
 ## Documentação
 
