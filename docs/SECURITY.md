@@ -6,7 +6,7 @@
 - `reporterHash` is not part of `EventDTO` (REST or STOMP). `toString()` of request/command objects omits `contact`.
 - The pepper lives only in env (`REPORTER_HASH_PEPPER`); startup fails without it. If the pepper leaks, phone numbers are brute-forceable: rotate it (old hashes stop correlating, which is acceptable: the hash only links reports from the same reporter).
 - Data minimization: no IP, user-agent or contact is stored. The rate limiter keeps client IPs in memory for at most one minute.
-- Supabase: `risk_events` and `flyway_schema_history` have RLS enabled with no policies, and grants to `anon`/`authenticated` are revoked (V3, V4). Only the backend role (which bypasses RLS) can access them, so PostgREST cannot expose `reporter_hash`.
+- Supabase: `risk_events` and `flyway_schema_history` have RLS enabled with no policies, and grants to `anon`/`authenticated` are revoked (V3 migration + `afterMigrate.sql` Flyway callback). Only the backend role (which bypasses RLS) can access them, so PostgREST cannot expose `reporter_hash`.
 
 ## Threat model (summary)
 | Asset / entry point | Threat | Control |
