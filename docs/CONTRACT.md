@@ -77,3 +77,16 @@ Response EventDTO = all domain fields except reporterHash.
 ## Env vars (see `.env.example`)
 DB_URL, DB_USERNAME, DB_PASSWORD, INGEST_API_KEY, REPORTER_HASH_PEPPER, CORS_ALLOWED_ORIGINS, EXPO_PUBLIC_API_URL.
 Tests use Testcontainers Postgres (Docker available) — never hit the real Supabase DB in tests.
+
+## Clarifications (v1.1)
+- `GET /events` returns `{ content: EventDTO[], page, size, totalElements, totalPages }` (custom PageResponse, not raw Spring Page).
+- `GET /alerts` returns a plain `EventDTO[]` (max 50).
+- `/actuator/health` returns `{ "status": "UP" }`; app treats any non-2xx/timeout (3s) as down.
+- Community events: `sourceRef` = `"community"`.
+- `/topic/events` also publishes on resolve (status `RESOLVED`); clients remove/update by `id`.
+- CORS default: `http://localhost:8081,http://localhost:19006,http://localhost:4173`.
+- DB constraints: `title` 1..120 required; `description`, `neighborhood`, `source_ref` NOT NULL (empty string allowed for description); `severity` smallint; `status` default `ACTIVE`; `reporter_hash` ≤128.
+
+## Sub-session operational rules
+- Run git as single plain commands from inside the worktree (no `git -C`, no chaining).
+- Any wait/poll loop MUST sleep ≥1s and cap retries (≤60). Never print unbounded output.
