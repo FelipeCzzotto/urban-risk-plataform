@@ -1,4 +1,6 @@
 import { fireEvent, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
+import { colors } from '../theme';
 import { makeEvent } from '../../test-utils/fixtures';
 import { renderWithApp } from '../../test-utils/renderWithApp';
 import { AlertsScreen } from '../screens/AlertsScreen';
@@ -53,10 +55,27 @@ describe('DashboardScreen', () => {
     expect(screen.getByTestId('event-card-f')).toBeTruthy();
   });
 
+  it('renders the total label in the on-primary color (AA contrast on primary bg)', async () => {
+    await renderWithApp(<DashboardScreen />, {
+      summary: { totalActive: 1, byType: {}, byLevel: {}, lastUpdatedAt: null },
+    });
+    expect(StyleSheet.flatten(screen.getByText('eventos ativos').props.style).color).toBe(colors.onPrimary);
+  });
+
   it('shows placeholder when no summary is available', async () => {
     await renderWithApp(<DashboardScreen />);
     expect(screen.getByText('Resumo indisponível.')).toBeTruthy();
   });
+});
+
+// axe scrollable-region-focusable: scrollable lists must be reachable by keyboard on web.
+it.each([
+  ['events-list', <EventsScreen key="e" />],
+  ['dashboard-list', <DashboardScreen key="d" />],
+  ['alerts-list', <AlertsScreen key="a" />],
+])('%s is keyboard focusable', async (id, ui) => {
+  await renderWithApp(ui);
+  expect(screen.getByTestId(id).props.focusable).toBe(true);
 });
 
 describe('AlertsScreen', () => {
