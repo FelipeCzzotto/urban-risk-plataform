@@ -1,4 +1,4 @@
-import { applyEventUpdate, filterEvents, sortEvents } from '../events';
+import { applyAlertUpdate, applyEventUpdate, filterEvents, sortEvents } from '../events';
 import { makeEvent } from '../../test-utils/fixtures';
 
 describe('events', () => {
@@ -27,6 +27,14 @@ describe('events', () => {
     const list = [makeEvent({ id: 'a' })];
     applyEventUpdate(list, makeEvent({ id: 'b' }));
     expect(list).toHaveLength(1);
+  });
+
+  it('alert list keeps only ACTIVE HIGH/CRITICAL', () => {
+    const list = [makeEvent({ id: 'a', priorityLevel: 'HIGH' })];
+    expect(applyAlertUpdate(list, makeEvent({ id: 'a', priorityLevel: 'MEDIUM' }))).toEqual([]);
+    expect(applyAlertUpdate(list, makeEvent({ id: 'a', status: 'RESOLVED' }))).toEqual([]);
+    expect(applyAlertUpdate(list, makeEvent({ id: 'b', priorityLevel: 'LOW' })).map((e) => e.id)).toEqual(['a']);
+    expect(applyAlertUpdate([], makeEvent({ id: 'c', priorityLevel: 'CRITICAL' })).map((e) => e.id)).toEqual(['c']);
   });
 
   it('filters by type and level', () => {
