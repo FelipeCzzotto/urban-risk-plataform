@@ -26,6 +26,8 @@ export function EventList({
   return (
     <FlatList
       testID={testID}
+      // Web: lets keyboard users focus and scroll the list (axe scrollable-region-focusable).
+      focusable
       data={events}
       keyExtractor={keyOf}
       renderItem={renderItem}

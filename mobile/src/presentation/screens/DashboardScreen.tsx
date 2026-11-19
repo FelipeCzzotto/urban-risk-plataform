@@ -23,7 +23,7 @@ function Summary() {
     <View style={styles.summary}>
       <View testID="summary-total" accessible accessibilityLabel={`${data.totalActive} eventos ativos`} style={styles.total}>
         <Text style={styles.totalValue}>{data.totalActive}</Text>
-        <Text style={styles.statLabel}>eventos ativos</Text>
+        <Text style={styles.totalLabel}>eventos ativos</Text>
       </View>
       <View style={styles.grid}>
         {EVENT_TYPES.map((t) => (
@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
   summary: { gap: 12, paddingBottom: 12 },
   total: { backgroundColor: colors.primary, borderRadius: 12, padding: 16 },
   totalValue: { color: colors.onPrimary, fontSize: 36, fontWeight: '800' },
+  totalLabel: { color: colors.onPrimary, fontSize: 14 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   stat: {
     flexGrow: 1,
