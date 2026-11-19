@@ -40,6 +40,12 @@ describe('connectionReducer', () => {
     expect(connectionReducer(connected, { type: 'NETWORK_ERROR' }).status).toBe('connected');
   });
 
+  it('connecting after starting offline counts as reconnected', () => {
+    let s = connectionReducer(initialConnection, { type: 'NETWORK_ERROR' });
+    s = connectionReducer(s, { type: 'CONNECTED' });
+    expect(s).toMatchObject({ status: 'connected', reconnected: true });
+  });
+
   it('a drop clears a pending reconnected flag', () => {
     let s = connectionReducer(initialConnection, { type: 'CONNECTED' });
     s = connectionReducer(s, { type: 'DISCONNECTED' });
