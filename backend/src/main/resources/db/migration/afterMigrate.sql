@@ -1,5 +1,7 @@
 -- Supabase grants anon/authenticated on every new public table; flyway's history table must not be
 -- readable/writable through PostgREST (schema recon / tampering). Backend role bypasses RLS.
+-- Flyway afterMigrate callback, not a versioned migration: altering the history table inside a migration
+-- deadlocks against Flyway's own lock on it. Idempotent, re-applied on every boot.
 alter table flyway_schema_history enable row level security;
 
 do $$
