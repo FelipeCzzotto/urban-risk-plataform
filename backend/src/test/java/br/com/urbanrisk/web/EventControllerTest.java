@@ -184,6 +184,27 @@ class EventControllerTest {
     }
 
     @Test
+    void nonFiniteCoordinatesReturn400() throws Exception {
+        for (String bad : List.of("\"latitude\":\"NaN\"", "\"latitude\":\"Infinity\"")) {
+            mvc.perform(post("/api/v1/events/sensor").header("X-API-Key", "test-key")
+                            .contentType(MediaType.APPLICATION_JSON).content(BODY.replace("\"latitude\":-23.55", bad)))
+                    .andExpect(status().isBadRequest());
+        }
+        verifyNoInteractions(ingestEvent);
+    }
+
+    @Test
+    void responsesCarrySecurityHeaders() throws Exception {
+        mvc.perform(get("/api/v1/alerts"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("X-Content-Type-Options", "nosniff"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("X-Frame-Options", "DENY"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Referrer-Policy", "no-referrer"));
+    }
+
+    @Test
     void unknownEnumReturns400() throws Exception {
         mvc.perform(post("/api/v1/events/sensor").header("X-API-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON).content(BODY.replace("FLOOD", "METEOR")))
