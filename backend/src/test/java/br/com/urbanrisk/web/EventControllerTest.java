@@ -140,6 +140,28 @@ class EventControllerTest {
     }
 
     @Test
+    void pathParameterOrEncodingCannotBypassApiKey() throws Exception {
+        for (String uri : List.of("/api/v1/events/sensor;x=1", "/api/v1/events/%73ensor", "/api/v1/events//public")) {
+            mvc.perform(post(java.net.URI.create(uri)).contentType(MediaType.APPLICATION_JSON).content(BODY))
+                    .andExpect(status().isUnauthorized());
+        }
+        mvc.perform(patch(java.net.URI.create("/api/v1/events/" + UUID.randomUUID() + "/resolve;x=1")))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(ingestEvent, resolveEvent);
+    }
+
+    @Test
+    void pathParameterCannotBypassCommunityRateLimit() throws Exception {
+        when(ingestEvent.execute(any())).thenReturn(sample(40, PriorityLevel.MEDIUM));
+        for (int i = 0; i < 4; i++) {
+            var result = mvc.perform(post(java.net.URI.create("/api/v1/events/community;n=" + i))
+                    .with(r -> { r.setRemoteAddr("10.0.0.77"); return r; })
+                    .contentType(MediaType.APPLICATION_JSON).content(COMMUNITY_BODY));
+            result.andExpect(status().is(i < 3 ? 201 : 429));
+        }
+    }
+
+    @Test
     void resolveWithoutKeyReturns401() throws Exception {
         mvc.perform(patch("/api/v1/events/{id}/resolve", UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
