@@ -5,10 +5,13 @@ import { AlertsScreen } from '../screens/AlertsScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { EventsScreen } from '../screens/EventsScreen';
 
-jest.mock('../components/EventsMap', () => {
-  const { Text } = require('react-native');
-  return { EventsMap: () => <Text testID="events-map">mapa</Text> };
-});
+// react-native-maps needs native modules; stub it.
+jest.mock('../components/EventsMap', () => ({
+  EventsMap: () => {
+    const { Text } = jest.requireActual<typeof import('react-native')>('react-native');
+    return <Text testID="events-map">mapa</Text>;
+  },
+}));
 
 const flood = makeEvent({ id: 'f', type: 'FLOOD', priorityLevel: 'HIGH', title: 'Alagamento A' });
 const heat = makeEvent({ id: 'h', type: 'HEAT_ISLAND', priorityLevel: 'LOW', title: 'Calor B' });

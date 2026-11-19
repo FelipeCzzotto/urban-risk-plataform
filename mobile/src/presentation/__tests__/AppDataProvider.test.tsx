@@ -31,14 +31,14 @@ function setup(over: Partial<{ [K in keyof AppDeps['api']]: jest.Mock }> = {}) {
     notify,
   };
   const wrapper = ({ children }: { children: ReactNode }) => <AppDataProvider deps={deps}>{children}</AppDataProvider>;
-  const hook = () => ({
+  const useAll = () => ({
     conn: useConnection(),
     events: useEvents(),
     alerts: useAlerts(),
     summary: useSummary(),
     toast: useToast(),
   });
-  return { api, realtime, notify, wrapper, hook, handlers: () => handlers };
+  return { api, realtime, notify, wrapper, hook: useAll, handlers: () => handlers };
 }
 
 describe('AppDataProvider', () => {
