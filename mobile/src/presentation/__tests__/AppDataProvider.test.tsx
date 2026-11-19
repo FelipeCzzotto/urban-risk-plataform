@@ -4,17 +4,18 @@ import type { ReactNode } from 'react';
 import { ApiError } from '../../data/apiClient';
 import { createCacheRepository } from '../../data/cacheRepository';
 import type { RealtimeHandlers } from '../../data/realtimeClient';
+import type { RiskEvent } from '../../domain/types';
 import { makeEvent } from '../../test-utils/fixtures';
 import { AppDataProvider, type AppDeps } from '../AppDataProvider';
 import { useAlerts, useConnection, useEvents, useSummary, useToast } from '../hooks';
 
 const summary = { totalActive: 1, byType: { FLOOD: 1 }, byLevel: { CRITICAL: 1 }, lastUpdatedAt: null };
 
-function setup(over: Partial<AppDeps['api']> = {}) {
+function setup(over: Partial<{ [K in keyof AppDeps['api']]: jest.Mock }> = {}) {
   let handlers!: RealtimeHandlers;
   const realtime = { start: jest.fn(), stop: jest.fn(() => Promise.resolve()) };
   const api = {
-    getEvents: jest.fn(() => Promise.resolve([makeEvent({ id: 'live' })])),
+    getEvents: jest.fn<Promise<RiskEvent[]>, []>(() => Promise.resolve([makeEvent({ id: 'live' })])),
     getAlerts: jest.fn(() => Promise.resolve([makeEvent({ id: 'live' })])),
     getSummary: jest.fn(() => Promise.resolve(summary)),
     ...over,
