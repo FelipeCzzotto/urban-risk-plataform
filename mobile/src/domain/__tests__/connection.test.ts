@@ -46,6 +46,12 @@ describe('connectionReducer', () => {
     expect(s).toMatchObject({ status: 'connected', reconnected: true });
   });
 
+  it('stays offline on further socket drops (banner must not flicker away)', () => {
+    let s = connectionReducer(initialConnection, { type: 'NETWORK_ERROR' });
+    s = connectionReducer(s, { type: 'DISCONNECTED' });
+    expect(s.status).toBe('offline');
+  });
+
   it('a drop clears a pending reconnected flag', () => {
     let s = connectionReducer(initialConnection, { type: 'CONNECTED' });
     s = connectionReducer(s, { type: 'DISCONNECTED' });
