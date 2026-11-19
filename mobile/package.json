@@ -45,7 +45,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "test:e2e": "playwright test",
-    "test:e2e:fullstack": "playwright test -c playwright.fullstack.config.ts"
+    "test:e2e:fullstack": "playwright test -c playwright.fullstack.config.ts",
+    "demo:video": "playwright test -c playwright.demo.config.ts",
+    "demo:video:supabase": "USE_ENV_DB=1 playwright test -c playwright.demo.config.ts"
   },
   "private": true
 }

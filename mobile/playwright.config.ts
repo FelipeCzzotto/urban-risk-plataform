@@ -7,7 +7,7 @@ const API = process.env.E2E_API_URL ?? 'http://127.0.0.1:9';
 
 export default defineConfig({
   testDir: './e2e',
-  testIgnore: 'fullstack.spec.ts', // needs the real backend: npm run test:e2e:fullstack
+  testIgnore: ['fullstack.spec.ts', 'demo.spec.ts'], // needs the real backend: npm run test:e2e:fullstack
   timeout: 30_000,
   retries: process.env.CI ? 1 : 0,
   use: { baseURL: `http://localhost:${PORT}`, trace: 'retain-on-failure' },

@@ -7,9 +7,12 @@ PID_FILE="${BACKEND_PID_FILE:-/tmp/urip-qa-backend.pid}"
 LOG_FILE="${BACKEND_LOG_FILE:-/tmp/urip-qa-backend.log}"
 HEALTH="${BACKEND_HEALTH_URL:-http://localhost:8080/actuator/health}"
 
-export DB_URL="${DB_URL:-jdbc:postgresql://localhost:55433/postgres}"
-export DB_USERNAME="${DB_USERNAME:-postgres}" DB_PASSWORD="${DB_PASSWORD:-qa}"
-export INGEST_API_KEY="${INGEST_API_KEY:-qa-key}" REPORTER_HASH_PEPPER="${REPORTER_HASH_PEPPER:-qa-pepper}"
+# USE_ENV_DB=1: let the backend read DB + secrets from the repo-root .env (real Supabase).
+if [ "${USE_ENV_DB:-}" != 1 ]; then
+  export DB_URL="${DB_URL:-jdbc:postgresql://localhost:55433/postgres}"
+  export DB_USERNAME="${DB_USERNAME:-postgres}" DB_PASSWORD="${DB_PASSWORD:-qa}"
+  export INGEST_API_KEY="${INGEST_API_KEY:-qa-key}" REPORTER_HASH_PEPPER="${REPORTER_HASH_PEPPER:-qa-pepper}"
+fi
 export CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS:-http://localhost:4174,http://127.0.0.1:4174}"
 
 up() { curl -fsS -m 2 "$HEALTH" 2>/dev/null | grep -q '"UP"'; }
