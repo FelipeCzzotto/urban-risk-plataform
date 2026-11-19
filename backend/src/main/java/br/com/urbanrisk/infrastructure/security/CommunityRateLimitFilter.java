@@ -25,16 +25,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CommunityRateLimitFilter extends OncePerRequestFilter {
 
     private static final long WINDOW_MS = 60_000;
-    private static final int MAX_TRACKED_CLIENTS = 10_000;
 
     private final int limit;
+    private final int maxTrackedClients;
     private final Map<String, Window> windows = new ConcurrentHashMap<>();
 
     private record Window(long start, int count) {
     }
 
-    public CommunityRateLimitFilter(@Value("${app.rate-limit.community-per-minute:10}") int limit) {
+    public CommunityRateLimitFilter(@Value("${app.rate-limit.community-per-minute:10}") int limit,
+                                    @Value("${app.rate-limit.max-tracked-clients:10000}") int maxTrackedClients) {
         this.limit = limit;
+        this.maxTrackedClients = maxTrackedClients;
+    }
+
+    int trackedClients() {
+        return windows.size();
     }
 
     @Override
@@ -48,10 +54,14 @@ public class CommunityRateLimitFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
         long now = System.currentTimeMillis();
-        if (windows.size() > MAX_TRACKED_CLIENTS) {
-            windows.values().removeIf(w -> now - w.start() >= WINDOW_MS);
+        String ip = request.getRemoteAddr();
+        if (!windows.containsKey(ip) && windows.size() >= maxTrackedClients) {
+            windows.values().removeIf(x -> now - x.start() >= WINDOW_MS);
         }
-        Window w = windows.compute(request.getRemoteAddr(), (k, cur) ->
+        // Table still full of live windows (e.g. IPv6 rotation flood): fail closed for unknown clients, memory stays bounded.
+        // ponytail: per-address key; bucket IPv6 by /64 if rotation within one prefix becomes an issue.
+        boolean full = !windows.containsKey(ip) && windows.size() >= maxTrackedClients;
+        Window w = full ? new Window(now, limit + 1) : windows.compute(ip, (k, cur) ->
                 cur == null || now - cur.start() >= WINDOW_MS ? new Window(now, 1) : new Window(cur.start(), cur.count() + 1));
         if (w.count() > limit) {
             response.setHeader("Retry-After", String.valueOf(Math.max(1, (WINDOW_MS - (now - w.start())) / 1000)));
