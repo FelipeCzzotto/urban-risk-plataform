@@ -18,6 +18,7 @@ npm run web                   # or: npx expo start (Expo Go / dev build)
 | `npm run lint` | `expo lint` (eslint-config-expo flat) |
 | `npm run build:web` | `expo export --platform web` into `dist/` |
 | `npm run test:e2e` | Playwright: builds web against an unreachable API, serves on :4173, checks tabs + offline banner. Set `E2E_API_URL` to test against a live backend. First run: `npx playwright install chromium`. |
+| `npm run test:e2e:fullstack` | Playwright (Chrome) against the real backend on :8080 with a local Docker Postgres on :55433 (`docker run --rm -d --name urip-qa-db -e POSTGRES_PASSWORD=qa -p 55433:5432 postgres:16`). Serves the web build on :4174, truncates `risk_events`, and starts/stops the backend through `e2e/backend-control.sh start\|stop`. Logs realtime latency, offline/reconnect times and axe results. |
 
 The WS URL is derived from the API URL: `http(s)://host` becomes `ws(s)://host/ws`.
 
