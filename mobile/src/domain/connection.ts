@@ -31,7 +31,7 @@ export function connectionReducer(s: ConnectionState, a: ConnectionAction): Conn
       return {
         status: 'connected',
         everConnected: true,
-        reconnected: s.everConnected && s.status !== 'connected',
+        reconnected: s.status === 'offline' || (s.everConnected && s.status === 'reconnecting'),
         failures: 0,
       };
     case 'DISCONNECTED': {
