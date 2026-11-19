@@ -40,7 +40,7 @@ export function connectionReducer(s: ConnectionState, a: ConnectionAction): Conn
         ...s,
         reconnected: false,
         failures,
-        status: failures >= OFFLINE_AFTER_FAILURES ? 'offline' : 'reconnecting',
+        status: s.status === 'offline' || failures >= OFFLINE_AFTER_FAILURES ? 'offline' : 'reconnecting',
       };
     }
     case 'NETWORK_ERROR':
