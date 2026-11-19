@@ -9,6 +9,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.UrlPathHelper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +32,8 @@ public class ApiKeyFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI().substring(request.getContextPath().length());
+        // Same normalization as MVC routing (decode, strip ;params, collapse //) so raw-URI tricks cannot skip the filter.
+        String path = UrlPathHelper.defaultInstance.getPathWithinApplication(request);
         String method = request.getMethod();
         boolean ingest = "POST".equals(method)
                 && (path.matches("^/api/v1/events/(sensor|public)/?$"));
