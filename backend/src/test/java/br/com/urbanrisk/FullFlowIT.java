@@ -153,6 +153,14 @@ class FullFlowIT {
     }
 
     @Test
+    void clientCannotPublishSpoofedEventsToBrokerTopics() throws Exception {
+        session.send("/topic/alerts", java.util.Map.of("id", "fake", "title", "Evacuate now"));
+        session.send("/topic/events", java.util.Map.of("id", "fake"));
+        assertThat(alerts.poll(1, TimeUnit.SECONDS)).isNull();
+        assertThat(events.poll(200, TimeUnit.MILLISECONDS)).isNull();
+    }
+
+    @Test
     void missingKeyIs401AndHealthIsUp() {
         assertThatThrownBy(() -> http.post().uri("/events/sensor")
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON).body(body(3))
