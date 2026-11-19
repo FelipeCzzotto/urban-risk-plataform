@@ -1,0 +1,20 @@
+.env
+.env.*
+!.env.example
+# java
+target/
+*.class
+# node / expo
+node_modules/
+.expo/
+dist/
+web-build/
+coverage/
+# playwright
+playwright-report/
+test-results/
+# ide/os
+.idea/
+.vscode/
+*.iml
+.DS_Store
