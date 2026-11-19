@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: urban-risk-backend
+  config:
+    import: optional:file:../.env[.properties]
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 10000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  mvc:
+    problemdetails:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+server:
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+app:
+  ingest-api-key: ${INGEST_API_KEY}
+  reporter-hash-pepper: ${REPORTER_HASH_PEPPER}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8081,http://localhost:19006,http://localhost:4173}
+  rate-limit:
+    community-per-minute: 10
+  simulator:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+app:
+  simulator:
+    enabled: true
