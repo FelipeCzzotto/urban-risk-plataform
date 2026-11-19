@@ -27,15 +27,6 @@ describe('apiClient', () => {
     ]);
   });
 
-  it('isHealthy: true on 2xx, false on error/non-2xx (never throws)', async () => {
-    const ok = createApiClient({ baseUrl: 'http://h', fetchImpl: jest.fn(() => json({ status: 'UP' })) });
-    await expect(ok.isHealthy()).resolves.toBe(true);
-    const down = createApiClient({ baseUrl: 'http://h', fetchImpl: jest.fn(() => json({}, 503)) });
-    await expect(down.isHealthy()).resolves.toBe(false);
-    const dead = createApiClient({ baseUrl: 'http://h', fetchImpl: jest.fn(() => Promise.reject(new Error('x'))) });
-    await expect(dead.isHealthy()).resolves.toBe(false);
-  });
-
   it('maps non-2xx to http ApiError with ProblemDetail title', async () => {
     const fetchImpl = jest.fn(() => json({ title: 'Bad Request', status: 400 }, 400));
     const api = createApiClient({ baseUrl: 'http://h', fetchImpl });

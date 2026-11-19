@@ -24,9 +24,9 @@ export interface ApiClientOptions {
 export type ApiClient = ReturnType<typeof createApiClient>;
 
 export function createApiClient({ baseUrl, fetchImpl = fetch, timeoutMs = 8000 }: ApiClientOptions) {
-  async function request(path: string, ms = timeoutMs): Promise<Response> {
+  async function request(path: string): Promise<Response> {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), ms);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
       return await fetchImpl(`${baseUrl}${path}`, {
         headers: { Accept: 'application/json' },
@@ -34,7 +34,7 @@ export function createApiClient({ baseUrl, fetchImpl = fetch, timeoutMs = 8000 }
       });
     } catch {
       throw controller.signal.aborted
-        ? new ApiError('timeout', `Tempo esgotado após ${ms}ms`)
+        ? new ApiError('timeout', `Tempo esgotado após ${timeoutMs}ms`)
         : new ApiError('network', 'Falha de rede');
     } finally {
       clearTimeout(timer);
@@ -64,13 +64,5 @@ export function createApiClient({ baseUrl, fetchImpl = fetch, timeoutMs = 8000 }
       (await getJson<PageResponse<RiskEvent>>('/api/v1/events?status=ACTIVE&page=0&size=100')).content,
     getAlerts: () => getJson<RiskEvent[]>('/api/v1/alerts'),
     getSummary: () => getJson<DashboardSummary>('/api/v1/dashboard/summary'),
-    /** Contract v1.1: any non-2xx or 3s timeout means down. Never throws. */
-    isHealthy: async () => {
-      try {
-        return (await request('/actuator/health', 3000)).ok;
-      } catch {
-        return false;
-      }
-    },
   };
 }
